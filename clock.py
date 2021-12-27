@@ -175,6 +175,7 @@ class AsyncZip(threading.Thread):
                     inter=0
                 co=1
                 now=now0
+            s(10)
 now1=datetime.now()
 nowl=[datetime.strptime((now1+timedelta(days=x)).strftime("%Y:%m:%d"),"%Y:%m:%d")for x in range(4)]
 with open(pf+'clock_autre.txt')as f:
