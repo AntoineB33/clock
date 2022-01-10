@@ -163,7 +163,7 @@ class AsyncZip(threading.Thread):
                         arrh=datetime.strptime(now.strftime("%Y:%b:%d"),"%Y:%b:%d")+timedelta(days=1)
                 now0 = datetime.now()
                 di=(datetime.now()-now).seconds
-                if co and di>5:
+                if co and di>15:
                     mat+=timedelta(seconds=di)
                     if di>20:
                         print(di)
