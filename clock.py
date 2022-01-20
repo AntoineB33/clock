@@ -1,6 +1,8 @@
 from datetime import datetime
 from datetime import timedelta
 import threading
+from pynput.keyboard import Key, Listener
+import keyboard
 from tkinter import *
 from time import sleep as s
 import pyttsx3
@@ -8,7 +10,18 @@ engine = pyttsx3.init()
 clock = Tk()
 clock.title("Clock")
 clock.geometry("800x300")
-pf='C:/Users/Laborde/Desktop/fichier_clock/'
+pf='C:/Users/comma/Desktop/fichier_clock/'
+def on_press(k):
+    if keyboard.is_pressed('w')and keyboard.is_pressed('x')and keyboard.is_pressed('c'):
+        fecran()
+class AsyncZip(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+    def run(self):
+        with Listener(on_press=on_press) as listener:
+            listener.join()
+background = AsyncZip()
+background.start()
 def fecran():
     global allum,yeux,quart,mat,now
     if allum.cget('text')=="écran allumé ?":
