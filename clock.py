@@ -24,7 +24,9 @@ class AsyncZip4(threading.Thread):
             comb.append(k)
         if"'w'"in comb and"'x'"in comb and"'c'"in comb:
             fecran()
+        print(comb)
         if"'w'"in comb and"'x'"in comb and"'f'"in comb and"'v'"in comb:
+            print(allum.cget('text'))
             if allum.cget('text')!="écran allumé ?":
                 fecran()
             os.system('shutdown -s')
