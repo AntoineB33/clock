@@ -6,19 +6,49 @@ import keyboard
 from tkinter import *
 from time import sleep as s
 import pyttsx3
+import atexit,osfrom win10toast import ToastNotifier
+n = ToastNotifier()
 engine = pyttsx3.init()
 clock = Tk()
 clock.title("Clock")
 clock.geometry("800x300")
 pf='C:/Users/comma/Desktop/fichier_clock/'
+comb=[]
+class AsyncZip4(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+    def run(self):
+        global key,exo,comb,shift
+        k=str(key)
+        if k not in comb:
+            comb.append(k)
+        if"'w'"in comb and"'x'"in comb and"'c'"in comb:
+            fecran()
+        if"'w'"in comb and"'x'"in comb and"'f'"in comb and"'v'"in comb:
+            if allum.cget('text')!="écran allumé ?":
+                fecran()
+            os.system('shutdown -s')
 def on_press(k):
-    if keyboard.is_pressed('w')and keyboard.is_pressed('x')and keyboard.is_pressed('c'):
-        fecran()
+    global key,background4
+    key=k
+    try:
+        background4.join()
+    except:
+        1
+    background4 = AsyncZip4()
+    background4.start()
+def on_release(k):
+    global comb,background4
+    try:
+        background4.join()
+    except:
+        1
+    comb=[]
 class AsyncZip(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
     def run(self):
-        with Listener(on_press=on_press) as listener:
+        with Listener(on_press=on_press,on_release=on_release) as listener:
             listener.join()
 background = AsyncZip()
 background.start()
@@ -30,7 +60,10 @@ def fecran():
             c=f.read().splitlines()
             if c:
                 save=datetime.strptime(c[0],"%Y:%b:%d:%H:%M:%S:%f")
-                mat=now+timedelta(seconds=(datetime.strptime(c[3],"%Y:%b:%d:%H:%M:%S:%f")-save).seconds)
+                diffe=datetime.strptime(c[3],"%Y:%b:%d:%H:%M:%S:%f")-save
+                print('mat',mat,diffe,diffe.seconds,diffe.microseconds)
+                mat=now+timedelta(seconds=diffe.seconds,microseconds=diffe.microseconds)
+                print(mat)
             else:
                 mat=now+timedelta(hours=2)
             if c:
@@ -135,7 +168,7 @@ class AsyncZip(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
     def run(self):
-        global yeux,quart,mat,arrh,allum,now
+        global yeux,quart,mat,arrh,allum,now,n
         try:
             quart
         except NameError:
@@ -149,6 +182,7 @@ class AsyncZip(threading.Thread):
             if allum.cget('text')=="éteindre l'écran ?"or inter:
                 if not inter:
                     if yeux<now:
+                        n.show_toast("Ferme les yeux","pendant 20 secondes")
                         engine.say("ferme les yeux")
                         engine.runAndWait()
                         fecran()
@@ -160,23 +194,25 @@ class AsyncZip(threading.Thread):
                         co=0
                     if quart<now:
                         re=now+timedelta(minutes=15)
+                        n.show_toast(f"mets en veille jusqu'à {re.hour} heures et {re.minute+bool(re.second!=0)} minutes")
                         engine.say(f"mets en veille jusqu'à {re.hour} heures et {re.minute+bool(re.second!=0)} minutes")
                         engine.runAndWait()
                         quart+=timedelta(days=1)
                     if mat<now:
+                        n.show_toast("change de matière")
                         engine.say("change de matière")
                         engine.runAndWait()
                         mat=now+timedelta(hours=2)
                         print(mat)
                     if arrh and arrh<now:
-                        print('arret')
+                        n.show_toast("arrêt demandé")
                         engine.say("arrêt demandé")
                         engine.runAndWait()
                         arr.delete(0,"end")
                         arrh=datetime.strptime(now.strftime("%Y:%b:%d"),"%Y:%b:%d")+timedelta(days=1)
                 now0 = datetime.now()
                 di=(datetime.now()-now).seconds
-                if co and di>15:
+                if co and di>15 or di>25:
                     mat+=timedelta(seconds=di)
                     if di>20:
                         print(di)
@@ -195,7 +231,7 @@ with open(pf+'clock_autre.txt')as f:
     c=f.read().splitlines()
 with open(pf+'clock_autre.txt','w')as f:
     da=[datetime.strptime(x,"%Y:%m:%d")for x in c]
-    ta=[['changer de serviette',3],['changer de pantalon',3],
+    ta=[['changer de serviette',3],['changer de pantalon',4],
         ['changer de veste',3],['se laver les cheveux',4],['changer de pyjama',7],['changer de tapis de bain',7]]
     txt=['']*len(ta)
     for i in range(len(ta)):
