@@ -6,13 +6,14 @@ import keyboard
 from tkinter import *
 from time import sleep as s
 import pyttsx3
-import atexit,osfrom win10toast import ToastNotifier
+import atexit,os
+from win10toast import ToastNotifier
 n = ToastNotifier()
 engine = pyttsx3.init()
 clock = Tk()
 clock.title("Clock")
 clock.geometry("800x300")
-pf='C:/Users/comma/Desktop/fichier_clock/'
+pf='fichier_clock/'
 comb=[]
 class AsyncZip4(threading.Thread):
     def __init__(self):
@@ -24,8 +25,7 @@ class AsyncZip4(threading.Thread):
             comb.append(k)
         if"'w'"in comb and"'x'"in comb and"'c'"in comb:
             fecran()
-        print(comb)
-        if"'w'"in comb and"'x'"in comb and"'f'"in comb and"'v'"in comb:
+        if "'w'"in comb and"'x'"in comb and"'g'"in comb:
             print(allum.cget('text'))
             if allum.cget('text')!="écran allumé ?":
                 fecran()
@@ -63,9 +63,15 @@ def fecran():
             if c:
                 save=datetime.strptime(c[0],"%Y:%b:%d:%H:%M:%S:%f")
                 diffe=datetime.strptime(c[3],"%Y:%b:%d:%H:%M:%S:%f")-save
-                print('mat',mat,diffe,diffe.seconds,diffe.microseconds)
+                try:
+                    print('mat',mat,diffe,diffe.seconds,diffe.microseconds)
+                except:
+                    1
                 mat=now+timedelta(seconds=diffe.seconds,microseconds=diffe.microseconds)
-                print(mat)
+                print('matttt',save,now,diffe,diffe.seconds,diffe.microseconds,mat)
+                print(now+timedelta(seconds=diffe.seconds))
+                print(now+timedelta(microseconds=diffe.microseconds))
+                print(now-save)
             else:
                 mat=now+timedelta(hours=2)
             if c:
@@ -99,20 +105,18 @@ allum = Button(clock,text = "écran allumé ?",fg="white",width = 15,command = f
 allum.place(x =120,y=30)
 def fsuiv():
     global mat,quart,liste,po,li
+    print('matav',mat)
     now=datetime.now()
     d=mat-now
     if mat>quart+timedelta(seconds=15):
         d-=timedelta(minutes=15)
     po+=1
     if po<len(li):
-        mat0=now+li[po]
+        mat=now+li[po]
         li[po-1]=d
     else:
-        mat0=now+timedelta(hours=2)
+        mat=now+timedelta(hours=2)
         li.append(d)
-    if mat0>quart:
-        mat0+=timedelta(minutes=15)
-    mat=mat0
     d=d.seconds
     bef=liste.cget("text")
     if bef:
@@ -124,6 +128,7 @@ def fsuiv():
         bef+=f'{d//60}min '
         d=d%60
     liste.config(text=bef+f'{d}s')
+    print('matap',mat)
 suiv = Button(clock,text = "suivant",fg='white',bg='black',width = 15,command = fsuiv)
 suiv.place(x =240,y=30)
 ug=1
@@ -161,11 +166,22 @@ sv = StringVar()
 sv.trace("w", lambda name, index, mode, sv=sv: arrf(sv))
 arr = Entry(clock,fg='blue',textvariable=sv)
 arr.place(x =150,y=100)
+arr.focus_set()
 arrt = Label(clock,text='arrêter à : ')
 arrt.place(x =0,y=100)
 li=[]
 po=0
 arrh=0
+noti=0
+def fnoti():
+    noti=1
+notif = Button(clock,text = "notification",fg='white',bg='black',width = 15,command = fnoti)
+notif.place(x =480,y=30)
+def fhour1():
+    global mat
+    mat=datetime.now()+timedelta(hours=1)
+hour1 = Button(clock,text = "1 heure",fg='white',bg='black',width = 15,command = fhour1)
+hour1.place(x =600,y=30)
 class AsyncZip(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
@@ -178,13 +194,14 @@ class AsyncZip(threading.Thread):
             input()
             quit()
         now=datetime.now()
-        co=1
-        inter=0
+        co=True
+        inter=False
         while 1:
             if allum.cget('text')=="éteindre l'écran ?"or inter:
                 if not inter:
                     if yeux<now:
-                        n.show_toast("Ferme les yeux","pendant 20 secondes")
+                        if noti:
+                            n.show_toast("Ferme les yeux","pendant 20 secondes")
                         engine.say("ferme les yeux")
                         engine.runAndWait()
                         fecran()
@@ -193,38 +210,39 @@ class AsyncZip(threading.Thread):
                         engine.runAndWait()
                         fecran()
                         mat+=timedelta(seconds=20)
-                        co=0
+                        co=False
                     if quart<now:
                         re=now+timedelta(minutes=15)
-                        n.show_toast(f"mets en veille jusqu'à {re.hour} heures et {re.minute+bool(re.second!=0)} minutes")
+                        if noti:
+                            n.show_toast(f"mets en veille jusqu'à {re.hour} heures et {re.minute+bool(re.second!=0)} minutes")
                         engine.say(f"mets en veille jusqu'à {re.hour} heures et {re.minute+bool(re.second!=0)} minutes")
                         engine.runAndWait()
                         quart+=timedelta(days=1)
                     if mat<now:
-                        n.show_toast("change de matière")
+                        if noti:
+                            n.show_toast("change de matière")
                         engine.say("change de matière")
                         engine.runAndWait()
                         mat=now+timedelta(hours=2)
                         print(mat)
                     if arrh and arrh<now:
-                        n.show_toast("arrêt demandé")
+                        if noti:
+                            n.show_toast("arrêt demandé")
                         engine.say("arrêt demandé")
                         engine.runAndWait()
                         arr.delete(0,"end")
                         arrh=datetime.strptime(now.strftime("%Y:%b:%d"),"%Y:%b:%d")+timedelta(days=1)
                 now0 = datetime.now()
-                di=(datetime.now()-now).seconds
-                if co and di>15 or di>25:
-                    mat+=timedelta(seconds=di)
-                    if di>20:
-                        print(di)
-                        inter=1
+                di=(now0-now).seconds
+                if co:
+                    if di>15:
+                        inter=True
                         fecran()
-                elif inter and allum.cget('text')=="écran allumé ?":
-                    print('inter')
-                    fecran()
-                    inter=0
-                co=1
+                    elif inter and allum.cget('text')=="écran allumé ?":
+                        print('inter')
+                        fecran()
+                        inter=False
+                co=True
                 now=now0
             s(10)
 now1=datetime.now()
@@ -233,8 +251,8 @@ with open(pf+'clock_autre.txt')as f:
     c=f.read().splitlines()
 with open(pf+'clock_autre.txt','w')as f:
     da=[datetime.strptime(x,"%Y:%m:%d")for x in c]
-    ta=[['changer de serviette',3],['changer de pantalon',4],
-        ['changer de veste',3],['se laver les cheveux',4],['changer de pyjama',7],['changer de tapis de bain',7]]
+    ta=[['changer de serviette',4],['changer de pantalon',4],
+        ['changer de veste',4],['se laver les cheveux',4],['changer de pyjama',7],['changer de tapis de bain',7]]
     txt=['']*len(ta)
     for i in range(len(ta)):
         while nowl[0]>da[i]:
