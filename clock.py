@@ -172,9 +172,14 @@ arrt.place(x =0,y=100)
 li=[]
 po=0
 arrh=0
-noti=0
+noti=False
 def fnoti():
-    noti=1
+    if noti:
+        noti=False
+        notif.config(bg='black')
+    else:
+        noti=True
+        notif.config(bg='red')
 notif = Button(clock,text = "notification",fg='white',bg='black',width = 15,command = fnoti)
 notif.place(x =480,y=30)
 def fhour1():
@@ -202,12 +207,14 @@ class AsyncZip(threading.Thread):
                     if yeux<now:
                         if noti:
                             n.show_toast("Ferme les yeux","pendant 20 secondes")
-                        engine.say("ferme les yeux")
-                        engine.runAndWait()
+                        else:
+                            engine.say("ferme les yeux")
+                            engine.runAndWait()
                         fecran()
                         s(20)
-                        engine.say("rouvre les yeux")
-                        engine.runAndWait()
+                        if not noti:
+                            engine.say("rouvre les yeux")
+                            engine.runAndWait()
                         fecran()
                         mat+=timedelta(seconds=20)
                         co=False
@@ -215,21 +222,24 @@ class AsyncZip(threading.Thread):
                         re=now+timedelta(minutes=15)
                         if noti:
                             n.show_toast(f"mets en veille jusqu'à {re.hour} heures et {re.minute+bool(re.second!=0)} minutes")
-                        engine.say(f"mets en veille jusqu'à {re.hour} heures et {re.minute+bool(re.second!=0)} minutes")
-                        engine.runAndWait()
+                        else:
+                            engine.say(f"mets en veille jusqu'à {re.hour} heures et {re.minute+bool(re.second!=0)} minutes")
+                            engine.runAndWait()
                         quart+=timedelta(days=1)
                     if mat<now:
                         if noti:
                             n.show_toast("change de matière")
-                        engine.say("change de matière")
-                        engine.runAndWait()
+                        else:
+                            engine.say("change de matière")
+                            engine.runAndWait()
                         mat=now+timedelta(hours=2)
                         print(mat)
                     if arrh and arrh<now:
                         if noti:
                             n.show_toast("arrêt demandé")
-                        engine.say("arrêt demandé")
-                        engine.runAndWait()
+                        else:
+                            engine.say("arrêt demandé")
+                            engine.runAndWait()
                         arr.delete(0,"end")
                         arrh=datetime.strptime(now.strftime("%Y:%b:%d"),"%Y:%b:%d")+timedelta(days=1)
                 now0 = datetime.now()
