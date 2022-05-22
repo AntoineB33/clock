@@ -13,7 +13,7 @@ engine = pyttsx3.init()
 clock = Tk()
 clock.title("Clock")
 clock.geometry("800x300")
-pf='fichier_clock/'
+pf='C:/Users/comma/AppData/Local/Programs/Python/Python39/clock/fichier_clock/'
 comb=[]
 class AsyncZip4(threading.Thread):
     def __init__(self):
@@ -64,18 +64,16 @@ def fecran():
                 save=datetime.strptime(c[0],"%Y:%b:%d:%H:%M:%S:%f")
                 diffe=datetime.strptime(c[3],"%Y:%b:%d:%H:%M:%S:%f")-save
                 try:
-                    print('mat',mat,diffe,diffe.seconds,diffe.microseconds)
+                    print('mat before :',mat)
                 except:
-                    1
+                    pass
                 mat=now+timedelta(seconds=diffe.seconds,microseconds=diffe.microseconds)
-                print('matttt',save,now,diffe,diffe.seconds,diffe.microseconds,mat)
-                print(now+timedelta(seconds=diffe.seconds))
-                print(now+timedelta(microseconds=diffe.microseconds))
-                print(now-save)
+                print('mat after :',mat)
+                print('now :',now)
+                print('diffe :',diffe)
             else:
+                print('mat+2h')
                 mat=now+timedelta(hours=2)
-            if c:
-                print(c==[], save,now-timedelta(seconds=20))
             if c==[]or save<=now-timedelta(seconds=20):
                 yeux=now+timedelta(minutes=20)
                 if c==[]or save<=now-timedelta(minutes=15):
@@ -91,12 +89,14 @@ def fecran():
             f.write('')
         allum.config(text="éteindre l'écran ?")
         allum.config(bg='green')
-        print(yeux)
-        print(quart)
-        print(mat,'\n')
+        print('yeux :',yeux)
+        print('quart :',quart)
+        print('mat :',mat,'\n')
     else:
         with open(pf+'clock.txt','w')as f:
-            print('rrrrr',now.strftime("%Y:%b:%d:%H:%M:%S:%f"))
+            print('now save :',now)
+            print('mat save :',mat)
+            print('diffe save :',mat-now)
             f.write(now.strftime("%Y:%b:%d:%H:%M:%S:%f")+'\n'+yeux.strftime("%Y:%b:%d:%H:%M:%S:%f")
                     +'\n'+quart.strftime("%Y:%b:%d:%H:%M:%S:%f")+'\n'+mat.strftime("%Y:%b:%d:%H:%M:%S:%f"))
         allum.config(text="écran allumé ?")
@@ -105,18 +105,20 @@ allum = Button(clock,text = "écran allumé ?",fg="white",width = 15,command = f
 allum.place(x =120,y=30)
 def fsuiv():
     global mat,quart,liste,po,li
-    print('matav',mat)
     now=datetime.now()
     d=mat-now
     if mat>quart+timedelta(seconds=15):
         d-=timedelta(minutes=15)
     po+=1
     if po<len(li):
-        mat=now+li[po]
+        mat0=now+li[po]
         li[po-1]=d
     else:
-        mat=now+timedelta(hours=2)
+        mat0=now+timedelta(hours=2)
         li.append(d)
+    if mat0>quart:
+        mat0+=timedelta(minutes=15)
+    mat=mat0
     d=d.seconds
     bef=liste.cget("text")
     if bef:
@@ -128,7 +130,6 @@ def fsuiv():
         bef+=f'{d//60}min '
         d=d%60
     liste.config(text=bef+f'{d}s')
-    print('matap',mat)
 suiv = Button(clock,text = "suivant",fg='white',bg='black',width = 15,command = fsuiv)
 suiv.place(x =240,y=30)
 ug=1
@@ -172,18 +173,14 @@ arrt.place(x =0,y=100)
 li=[]
 po=0
 arrh=0
-noti=False
+noti=0
 def fnoti():
-    if noti:
-        noti=False
-        notif.config(bg='black')
-    else:
-        noti=True
-        notif.config(bg='red')
+    noti=1
 notif = Button(clock,text = "notification",fg='white',bg='black',width = 15,command = fnoti)
 notif.place(x =480,y=30)
 def fhour1():
     global mat
+    print('new mat :',mat)
     mat=datetime.now()+timedelta(hours=1)
 hour1 = Button(clock,text = "1 heure",fg='white',bg='black',width = 15,command = fhour1)
 hour1.place(x =600,y=30)
@@ -199,60 +196,54 @@ class AsyncZip(threading.Thread):
             input()
             quit()
         now=datetime.now()
-        co=True
-        inter=False
+        co=1
+        inter=0
         while 1:
             if allum.cget('text')=="éteindre l'écran ?"or inter:
                 if not inter:
                     if yeux<now:
                         if noti:
                             n.show_toast("Ferme les yeux","pendant 20 secondes")
-                        else:
-                            engine.say("ferme les yeux")
-                            engine.runAndWait()
+                        engine.say("ferme les yeux")
+                        engine.runAndWait()
                         fecran()
                         s(20)
-                        if not noti:
-                            engine.say("rouvre les yeux")
-                            engine.runAndWait()
+                        engine.say("rouvre les yeux")
+                        engine.runAndWait()
                         fecran()
-                        mat+=timedelta(seconds=20)
-                        co=False
+                        co=0
                     if quart<now:
                         re=now+timedelta(minutes=15)
                         if noti:
                             n.show_toast(f"mets en veille jusqu'à {re.hour} heures et {re.minute+bool(re.second!=0)} minutes")
-                        else:
-                            engine.say(f"mets en veille jusqu'à {re.hour} heures et {re.minute+bool(re.second!=0)} minutes")
-                            engine.runAndWait()
+                        engine.say(f"mets en veille jusqu'à {re.hour} heures et {re.minute+bool(re.second!=0)} minutes")
+                        engine.runAndWait()
                         quart+=timedelta(days=1)
                     if mat<now:
                         if noti:
                             n.show_toast("change de matière")
-                        else:
-                            engine.say("change de matière")
-                            engine.runAndWait()
+                        engine.say("change de matière")
+                        engine.runAndWait()
                         mat=now+timedelta(hours=2)
-                        print(mat)
+                        print('new mat',mat)
                     if arrh and arrh<now:
                         if noti:
                             n.show_toast("arrêt demandé")
-                        else:
-                            engine.say("arrêt demandé")
-                            engine.runAndWait()
+                        engine.say("arrêt demandé")
+                        engine.runAndWait()
                         arr.delete(0,"end")
                         arrh=datetime.strptime(now.strftime("%Y:%b:%d"),"%Y:%b:%d")+timedelta(days=1)
                 now0 = datetime.now()
-                di=(now0-now).seconds
-                if co:
-                    if di>15:
-                        inter=True
-                        fecran()
-                    elif inter and allum.cget('text')=="écran allumé ?":
-                        print('inter')
-                        fecran()
-                        inter=False
-                co=True
+                di=(datetime.now()-now).seconds
+                if co and di>20:
+                    print(di)
+                    inter=1
+                    fecran()
+                elif inter and allum.cget('text')=="écran allumé ?":
+                    print('inter')
+                    fecran()
+                    inter=0
+                co=1
                 now=now0
             s(10)
 now1=datetime.now()
@@ -262,8 +253,9 @@ with open(pf+'clock_autre.txt')as f:
 with open(pf+'clock_autre.txt','w')as f:
     da=[datetime.strptime(x,"%Y:%m:%d")for x in c]
     ta=[['changer de serviette',4],['changer de pantalon',4],
-        ['changer de veste',4],['se laver les cheveux',4],['changer de pyjama',7],['changer de tapis de bain',7]]
-    txt=['']*len(ta)
+        ['changer de veste',5],['se laver les cheveux',3],['changer de pyjama',7],['changer de tapis de bain',7]]
+    txt=['changer de serviette : ','changer de pantalon :','changer de veste : ',
+         'se laver les cheveux :','changer de pyjama : ','changer de tapis de bain : ']
     for i in range(len(ta)):
         while nowl[0]>da[i]:
             da[i]+=timedelta(days=ta[i][1])
